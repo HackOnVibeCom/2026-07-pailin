@@ -1,0 +1,222 @@
+@import "tailwindcss";
+
+/* ----------------------------------------------------------------------------
+   FUSE design tokens — dark, premium, neon-green accent (from the logo)
+   inspired by the floating-card crypto reference.
+---------------------------------------------------------------------------- */
+@theme {
+  --color-ink-950: #050608;
+  --color-ink-900: #0a0b11;
+  --color-ink-850: #0d0f17;
+  --color-ink-800: #11131d;
+  --color-ink-700: #1a1d2b;
+  --color-ink-600: #262a3d;
+
+  --color-fuse-50: #eafff3;
+  --color-fuse-100: #c8ffe0;
+  --color-fuse-200: #8dffc1;
+  --color-fuse-300: #4dfca0;
+  --color-fuse-400: #23e27e;
+  --color-fuse-500: #12c869;
+  --color-fuse-600: #08a455;
+  --color-fuse-700: #097f45;
+
+  --color-violet-400: #8b7bff;
+  --color-violet-500: #6b5df0;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: var(--font-space), ui-sans-serif, system-ui, sans-serif;
+
+  --shadow-glow: 0 0 0 1px rgba(35, 226, 126, 0.18), 0 18px 50px -12px rgba(35, 226, 126, 0.35);
+  --shadow-card: 0 30px 80px -20px rgba(0, 0, 0, 0.8);
+}
+
+:root {
+  color-scheme: dark;
+}
+
+* {
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background-color: var(--color-ink-950);
+  color: #eef1f7;
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+/* Ambient background gradient field --------------------------------------- */
+.bg-field {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(60% 50% at 78% 12%, rgba(107, 93, 240, 0.22), transparent 60%),
+    radial-gradient(50% 45% at 12% 8%, rgba(35, 226, 126, 0.14), transparent 55%),
+    radial-gradient(80% 60% at 50% 110%, rgba(35, 226, 126, 0.1), transparent 60%),
+    linear-gradient(180deg, #07080d 0%, #050608 100%);
+}
+.bg-grid {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(circle at 50% 30%, black, transparent 75%);
+  -webkit-mask-image: radial-gradient(circle at 50% 30%, black, transparent 75%);
+}
+
+/* Glass surfaces ----------------------------------------------------------- */
+.glass {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.glass-strong {
+  background: linear-gradient(180deg, rgba(18, 20, 30, 0.92), rgba(10, 11, 17, 0.92));
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Gradient + neon text ----------------------------------------------------- */
+.text-gradient {
+  background: linear-gradient(180deg, #ffffff 0%, #b9c0d4 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.text-neon {
+  color: var(--color-fuse-400);
+  text-shadow: 0 0 24px rgba(35, 226, 126, 0.5);
+}
+
+/* 3D helpers --------------------------------------------------------------- */
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+.perspective-card {
+  perspective: 1400px;
+}
+
+/* Animations --------------------------------------------------------------- */
+@keyframes float-y {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+}
+.animate-float { animation: float-y 6s ease-in-out infinite; }
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.18), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2.4s linear infinite;
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.9); opacity: 0.7; }
+  70% { transform: scale(1.6); opacity: 0; }
+  100% { opacity: 0; }
+}
+
+@keyframes spin-slow {
+  to { transform: rotate(360deg); }
+}
+.animate-spin-slow { animation: spin-slow 18s linear infinite; }
+
+/* Marquee ------------------------------------------------------------------ */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.animate-marquee { animation: marquee 28s linear infinite; }
+
+/* Scrollbar ---------------------------------------------------------------- */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--color-ink-950); }
+::-webkit-scrollbar-thumb {
+  background: var(--color-ink-700);
+  border-radius: 999px;
+  border: 2px solid var(--color-ink-950);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--color-ink-600); }
+
+/* Selection ---------------------------------------------------------------- */
+::selection {
+  background: rgba(35, 226, 126, 0.3);
+  color: #fff;
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Solana wallet-adapter modal — themed to match FUSE ----------------------- */
+.wallet-adapter-modal-wrapper {
+  background: linear-gradient(180deg, #11131d, #0a0b11) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 24px !important;
+  box-shadow: var(--shadow-card) !important;
+  font-family: var(--font-sans) !important;
+}
+.wallet-adapter-modal-title {
+  color: #fff !important;
+  font-family: var(--font-display) !important;
+}
+.wallet-adapter-modal-list .wallet-adapter-button {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.07) !important;
+  border-radius: 14px !important;
+  font-weight: 600 !important;
+  transition: all 0.18s ease !important;
+}
+.wallet-adapter-modal-list .wallet-adapter-button:hover {
+  background: rgba(35, 226, 126, 0.08) !important;
+  border-color: rgba(35, 226, 126, 0.4) !important;
+}
+.wallet-adapter-modal-button-close {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-radius: 999px !important;
+}
+.wallet-adapter-button-trigger {
+  background: var(--color-fuse-400) !important;
+  color: #050608 !important;
+}
+
+/* Range slider ------------------------------------------------------------- */
+.fuse-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+}
+.fuse-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid var(--color-fuse-400);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+.fuse-range::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid var(--color-fuse-400);
+}
