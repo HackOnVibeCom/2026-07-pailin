@@ -11,6 +11,8 @@ export interface ExecuteArgs {
   amountUsd: number;
   /** Real on-chain settlement (Jupiter swap → USDC transfer to merchant). */
   settle: (report: StageReport) => Promise<SettleResult>;
+  /** "demo" runs the same lifecycle against a simulated settle (no real funds). */
+  mode?: "mainnet" | "demo";
 }
 
 export interface UseFuseExecute {
@@ -40,10 +42,10 @@ export function useFuseExecute(): UseFuseExecute {
   }, []);
 
   const execute = useCallback(async (args: ExecuteArgs) => {
-    const { selections, amountUsd, settle } = args;
+    const { selections, amountUsd, settle, mode = "mainnet" } = args;
     setError(null);
     const tokens = selections.filter((s) => s.amount > 0).map((s) => s.walletToken.token.symbol);
-    track("Payment Started", { tokens, amountUsd, mode: "mainnet" });
+    track("Payment Started", { tokens, amountUsd, mode });
 
     const report: StageReport = (s, label) => {
       setStatus(s);
@@ -61,7 +63,7 @@ export function useFuseExecute(): UseFuseExecute {
         merchantReceivedUsdc: r.usdc,
         tokensUsed: tokens,
         completedAt: Date.now(),
-        mode: "mainnet",
+        mode,
       };
 
       setResult(payment);
@@ -71,13 +73,13 @@ export function useFuseExecute(): UseFuseExecute {
         amountUsd,
         usdc: Number(payment.merchantReceivedUsdc.toFixed(2)),
         txHash: payment.txHash,
-        mode: "mainnet",
+        mode,
       });
     } catch (e) {
       setStatus("error");
       const msg = e instanceof Error ? e.message : "Payment failed";
       setError(msg);
-      track("Payment Failed", { tokens, amountUsd, mode: "mainnet", error: msg });
+      track("Payment Failed", { tokens, amountUsd, mode, error: msg });
     }
   }, []);
 

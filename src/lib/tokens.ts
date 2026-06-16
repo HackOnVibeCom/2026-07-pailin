@@ -80,3 +80,11 @@ export const MOCK_WALLET: WalletToken[] = [
 ];
 
 export const MERCHANT_ADDRESS = "8FuSeMerCh4ntXyZpAy2RecVUSDCdemo9aBcDeFgHJk";
+
+/**
+ * Recipient used by the demo wallet flow. Unlike MERCHANT_ADDRESS (a vanity
+ * placeholder that intentionally doesn't parse, so real users type their own),
+ * this is a valid base58 address — the demo wallet prefills it so the simulated
+ * payment can run end-to-end without anyone entering a recipient.
+ */
+export const DEMO_MERCHANT = "4ZYCDQNKg6kfoMyRSbhDA72rUfaaZegP2Jo65gGLH7MS";

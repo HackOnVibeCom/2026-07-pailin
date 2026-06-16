@@ -22,8 +22,9 @@ import { TokenSelector } from "./TokenSelector";
 import { useFuseQuote, type Selection } from "./useFuseQuote";
 import { useFuseExecute } from "./useFuseExecute";
 import { fetchWalletTokens } from "@/lib/wallet-balances";
+import { DEMO_MERCHANT, MOCK_WALLET } from "@/lib/tokens";
 import { parsePubkey, explorerTx } from "./settlement";
-import { settleMainnet, type StageReport } from "./settle";
+import { settleMainnet, type StageReport, type SettleResult } from "./settle";
 import { track } from "@/lib/analytics";
 import { Logo } from "@/components/ui/Logo";
 import { TokenIcon } from "@/components/ui/TokenIcon";
@@ -58,6 +59,9 @@ export function FuseCheckout({
   const [loadingBalances, setLoadingBalances] = useState(false);
   const [balanceError, setBalanceError] = useState<string | null>(null);
   const [allocations, setAllocations] = useState<Record<string, number>>({});
+  // Demo wallet: loads Sarah's mock balances and simulates settlement (no real
+  // signer, no funds moved) so the flow can be experienced without a wallet.
+  const [demo, setDemo] = useState(false);
 
   // The payer types in where the USDC should be sent. Prefill from the prop only
   // if it's a real base58 address (the landing demo passes a placeholder string).
@@ -113,6 +117,18 @@ export function FuseCheckout({
     setBalanceError(null);
     if (connected && publicKey) loadBalances(publicKey);
     else setVisible(true);
+  }
+
+  // Load Sarah's mock wallet and jump straight to token selection. Payment is
+  // simulated (see pay()), so we prefill a valid demo recipient too.
+  function startDemo() {
+    setBalanceError(null);
+    setDemo(true);
+    setWallet(MOCK_WALLET);
+    setAllocations({});
+    setRecipientInput(DEMO_MERCHANT);
+    setStep("select");
+    track("Wallet Connected", { address: "demo-wallet", demo: true });
   }
 
   const selections: Selection[] = useMemo(
@@ -171,17 +187,29 @@ export function FuseCheckout({
   }
 
   async function pay() {
-    if (!connected || !publicKey) {
+    // The demo wallet has no signer — skip the real-wallet requirement.
+    if (!demo && (!connected || !publicKey)) {
       setVisible(true);
       return;
     }
     if (!merchantPubkey) return;
-    // Show a "sending to <addr> — correct?" check before signing real funds.
+    // Show a "sending to <addr> — correct?" check before settling.
     if (!confirming) {
       setConfirming(true);
       return;
     }
     setConfirming(false);
+
+    if (demo) {
+      // Same staged lifecycle as mainnet, but simulated — no funds move.
+      const settle = (report: StageReport) =>
+        simulateSettlement(selections, outputUsdc, report);
+      await execute({ selections, amountUsd: amount, settle, mode: "demo" });
+      setStep("success");
+      return;
+    }
+
+    if (!publicKey) return;
     const merchant = merchantPubkey;
     const settle = (report: StageReport) =>
       settleMainnet(
@@ -196,6 +224,7 @@ export function FuseCheckout({
     setAllocations({});
     setWallet([]);
     setBalanceError(null);
+    setDemo(false);
     setRecipientInput(recipient && parsePubkey(recipient) ? recipient : "");
     setConfirming(false);
     reset();
@@ -279,6 +308,21 @@ export function FuseCheckout({
                 {connected && publicKey ? `Use ${shortAddress(publicKey.toBase58(), 4)}` : "Connect Wallet"}
               </Button>
 
+              <div className="mt-4 flex w-full items-center gap-3 text-[11px] text-zinc-600">
+                <span className="h-px flex-1 bg-white/8" />
+                no wallet?
+                <span className="h-px flex-1 bg-white/8" />
+              </div>
+
+              <button
+                onClick={startDemo}
+                disabled={loadingBalances}
+                className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-fuse-400/30 bg-fuse-400/10 px-4 py-2.5 text-sm font-medium text-fuse-300 transition-colors hover:bg-fuse-400/20 disabled:opacity-50 cursor-pointer"
+              >
+                <Sparkles className="h-4 w-4" />
+                Try the demo wallet
+              </button>
+
               <div className="mt-5 flex items-center gap-1.5 text-xs text-zinc-500">
                 <ShieldCheck className="h-3.5 w-3.5 text-fuse-400" />
                 Non-custodial · You approve every transaction
@@ -300,9 +344,9 @@ export function FuseCheckout({
               <div className="mb-3 flex items-center justify-between">
                 <div className="flex items-center gap-2 text-xs text-zinc-400">
                   <span className="flex h-2 w-2 rounded-full bg-fuse-400" />
-                  {shortAddress(address, 5)}
+                  {demo ? "Demo wallet" : shortAddress(address, 5)}
                   <span className="rounded bg-fuse-400/15 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-fuse-300">
-                    Mainnet
+                    {demo ? "Demo" : "Mainnet"}
                   </span>
                   <span className="text-zinc-600">·</span>
                   <span className="tabular-nums">{formatUsd(walletValue)}</span>
@@ -439,8 +483,17 @@ export function FuseCheckout({
                       <div className="flex items-start gap-2 text-xs text-amber-200">
                         <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
                         <span>
-                          Sending <strong>{formatUsd(outputUsdc)} USDC</strong> to this address. This
-                          is final and can&apos;t be reversed — double-check it&apos;s correct.
+                          {demo ? (
+                            <>
+                              Simulated payment of <strong>{formatUsd(outputUsdc)} USDC</strong> — no
+                              real funds move. This is a demo of the live settlement flow.
+                            </>
+                          ) : (
+                            <>
+                              Sending <strong>{formatUsd(outputUsdc)} USDC</strong> to this address. This
+                              is final and can&apos;t be reversed — double-check it&apos;s correct.
+                            </>
+                          )}
                         </span>
                       </div>
                       <div className="mt-2 break-all rounded-lg bg-ink-950/60 px-2.5 py-2 font-mono text-[11px] text-white">
@@ -484,7 +537,9 @@ export function FuseCheckout({
                 </button>
               )}
               <p className="mt-2.5 text-center text-[11px] text-zinc-600">
-                Live Jupiter swap · Real USDC settled on Solana mainnet
+                {demo
+                  ? "Simulated demo · no funds move · connect a wallet for real settlement"
+                  : "Live Jupiter swap · Real USDC settled on Solana mainnet"}
               </p>
             </motion.div>
           )}
@@ -513,6 +568,11 @@ export function FuseCheckout({
                 {formatUsd(result.merchantReceivedUsdc)} USDC sent to{" "}
                 <span className="font-mono text-zinc-300">{shortAddress(recipientInput, 4)}</span>
               </p>
+              {result.mode === "demo" && (
+                <span className="mt-2 rounded-lg bg-fuse-400/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-fuse-300">
+                  Simulated demo · no funds moved
+                </span>
+              )}
 
               <div className="mt-5 w-full space-y-2.5 rounded-2xl border border-white/8 bg-ink-900/60 p-4 text-left text-sm">
                 <Row label="Amount paid" value={formatUsd(result.amountPaidUsd)} />
@@ -532,14 +592,23 @@ export function FuseCheckout({
                 <Row
                   label="Transaction"
                   value={
-                    <a
-                      className="text-fuse-400 hover:underline"
-                      href={explorerTx(result.txHash)}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      {shortAddress(result.txHash, 6)} ↗
-                    </a>
+                    result.mode === "demo" ? (
+                      <span className="flex items-center gap-1.5 font-mono">
+                        {shortAddress(result.txHash, 6)}
+                        <span className="rounded bg-fuse-400/15 px-1.5 py-0.5 font-sans text-[9px] font-semibold uppercase tracking-wide text-fuse-300">
+                          Demo
+                        </span>
+                      </span>
+                    ) : (
+                      <a
+                        className="text-fuse-400 hover:underline"
+                        href={explorerTx(result.txHash)}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {shortAddress(result.txHash, 6)} ↗
+                      </a>
+                    )
                   }
                 />
               </div>
@@ -593,6 +662,37 @@ export function FuseCheckout({
       )}
     </AnimatePresence>
   );
+}
+
+const SLEEP = (ms: number) => new Promise((r) => setTimeout(r, ms));
+const BASE58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+
+/** A base58, signature-length placeholder for the simulated demo payment. */
+function demoSignature() {
+  let s = "";
+  for (let i = 0; i < 88; i++) s += BASE58[Math.floor(Math.random() * BASE58.length)];
+  return s;
+}
+
+/**
+ * Simulated settlement for the demo wallet — drives the same staged lifecycle
+ * (swap each token → transfer USDC) as settleMainnet, but signs nothing and
+ * moves no funds. Returns a placeholder signature.
+ */
+async function simulateSettlement(
+  selections: Selection[],
+  outputUsdc: number,
+  report: StageReport,
+): Promise<SettleResult> {
+  for (const sel of selections) {
+    const { token } = sel.walletToken;
+    if (token.symbol === "USDC") continue;
+    report("swapping", `Swapping ${token.symbol} → USDC`);
+    await SLEEP(650);
+  }
+  report("settling", "Transferring USDC to merchant");
+  await SLEEP(650);
+  return { txHash: demoSignature(), usdc: outputUsdc };
 }
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {

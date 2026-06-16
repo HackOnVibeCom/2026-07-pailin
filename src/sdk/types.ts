@@ -67,7 +67,7 @@ export interface PaymentResult {
   tokensUsed: string[];
   completedAt: number;
   /** Settlement path that produced this result */
-  mode?: "mainnet";
+  mode?: "mainnet" | "demo";
 }
 
 export interface FuseCheckoutConfig {
