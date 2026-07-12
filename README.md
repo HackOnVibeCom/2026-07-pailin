@@ -7,7 +7,19 @@
 **Stripe for Web3** — customers pay with assets they already own (SOL, BONK, JUP…),
 merchants receive USDC automatically. One checkout. One payment flow.
 
-Built for the **World Product Day #EveryoneShipsNow** hackathon.
+**HackOnVibe 2026** · team **pailin**
+
+### 🌐 Live demo
+
+**[https://fuse-sage.vercel.app](https://fuse-sage.vercel.app)**
+
+> Deployed on **Vercel** (Next.js SSR + API routes). Use this URL for judging and demos.
+
+| | |
+|---|---|
+| Landing + checkout | [fuse-sage.vercel.app](https://fuse-sage.vercel.app) |
+| Merchant dashboard | [fuse-sage.vercel.app/dashboard](https://fuse-sage.vercel.app/dashboard) |
+| Source | [HackOnVibeCom/2026-07-pailin](https://github.com/HackOnVibeCom/2026-07-pailin) |
 
 </div>
 
