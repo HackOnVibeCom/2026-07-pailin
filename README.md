@@ -20,8 +20,111 @@ merchants receive USDC automatically. One checkout. One payment flow.
 | Landing + checkout | [fuse-sage.vercel.app](https://fuse-sage.vercel.app) |
 | Merchant dashboard | [fuse-sage.vercel.app/dashboard](https://fuse-sage.vercel.app/dashboard) |
 | Source | [HackOnVibeCom/2026-07-pailin](https://github.com/HackOnVibeCom/2026-07-pailin) |
+| **Demo video** | **[youtube.com/watch?v=amv4EivHgl4](https://youtu.be/amv4EivHgl4)** |
 
 </div>
+
+---
+
+## 📋 HackOnVibe questionnaire
+
+Submission answers for judges. **Live app:** [fuse-sage.vercel.app](https://fuse-sage.vercel.app) · **Demo video:** [youtu.be/amv4EivHgl4](https://youtu.be/amv4EivHgl4)
+
+### 1. What does your application / service do?
+
+**FUSE** is **Stripe for Web3 on Solana**.
+
+Customers pay with **any tokens they already hold** (SOL, BONK, JUP, USDC, mixed baskets). Merchants receive **USDC automatically** after smart routing + on-chain settlement. One checkout. One payment flow.
+
+Under the hood:
+
+- Real wallet connect (Phantom / Solflare / Backpack)
+- Live multi-token balances and Jupiter quotes/swaps
+- Swap → USDC → transfer to the merchant wallet (mainnet-capable)
+- Drop-in SDK: `<FuseCheckout amount={…} currency="USDC" recipient="…" />`
+- Merchant analytics dashboard (conversion funnel + live events)
+
+### 2. Who is the target audience?
+
+| Role | Audience |
+|------|----------|
+| **Buyers of the service (customers)** | Solana merchants, dApps, NFT/store checkouts, creators, in-game shops, crypto SaaS that want **USDC in** without managing token chaos |
+| **End users of checkout** | Wallet holders with mixed SOL + SPL balances who abandon carts when they “don’t have the right token” |
+| **Integrators** | Indie builders and agencies shipping Solana storefronts who want a 3-line checkout embed |
+
+**Ideal first customer:** indie Solana storefront / dApp doing roughly **$1k–$50k/mo** volume, already crypto-native, losing sales when buyers only hold memecoins or SOL.
+
+### 3. Which countries are the expected buyers of this service?
+
+FUSE is **borderless by design** (wallet + on-chain USDC), but early **commercial buyers** (merchants who integrate and pay fees) concentrate where Solana commerce and crypto-native founders are densest:
+
+| Priority | Regions / markets | Why |
+|----------|-------------------|-----|
+| **1 — Core** | **United States**, **Canada** | High Solana merchant / founder density, USDC rails, English-first GTM |
+| **1 — Core** | **Western Europe** (UK, Germany, France, Netherlands, Nordics, Portugal) | Strong indie + Web3 product culture; multi-currency pain maps to stablecoin settlement |
+| **1 — Core** | **Singapore**, **UAE**, **South Korea**, **Japan** | Active crypto commerce and Solana communities |
+| **2 — Growth** | **Nigeria**, **Kenya**, **South Africa**, **Ghana** (and broader English-speaking Africa) | Mobile-first crypto usage; merchants want stable value (USDC) while users hold local/meme/SOL assets |
+| **2 — Growth** | **India**, **Vietnam**, **Indonesia**, **Philippines**, **Brazil**, **Argentina**, **Mexico** | Large retail crypto populations; remittance- and internet-native sellers |
+
+**Not a geo-locked product:** any merchant with a Solana wallet can settle. GTM and first revenue focus on English + high-activity Solana hubs, then expand with local partners.
+
+### 4. Who are your competitors?
+
+| Competitor / category | What they do | Gap vs FUSE |
+|----------------------|--------------|-------------|
+| **Helio / Sphere / Candypay-style Solana pay links** | Crypto invoices & pay buttons | Often expect a **specific** asset or simpler single-token flow; less “any mix of tokens → USDC” checkout UX |
+| **Crossmint / MoonPay / fiat on-ramps** | Card → crypto or NFT checkout | Solve **fiat entry**, not “I already have five SPL tokens and want to pay this invoice” |
+| **DIY Jupiter + wallet adapter** | Merchant builds swap + transfer themselves | Weeks of engineering, no productized checkout, weak analytics |
+| **Stripe / PayPal (fiat)** | Best-in-class card checkout | No native “pay with BONK + SOL basket, settle USDC” for crypto-native buyers |
+| **CEX withdraw + pay** | User sells on Binance/Coinbase then pays | Leaves the merchant site; kills conversion |
+
+FUSE competes on **merchant conversion at crypto checkout**, not on being a full CEX or a card processor.
+
+### 5. What is your advantage?
+
+1. **Any-token basket → merchant USDC** in one flow (not “go swap, then come back”).
+2. **Real rails:** Jupiter quote/swap + on-chain settlement + wallet-standard connect — not a mock-only pitch.
+3. **Productized UX + SDK** — landing, modal/embedded checkout, success + Solscan, 3-line merchant embed.
+4. **Merchant ops loop** — Novus-style events and `/dashboard` funnel so sellers see where checkout drops, not only that a tx happened.
+5. **Clear commercial model** — 0.5% take rate + Pro SaaS (see Business Success section below), path to first revenue with design partners.
+
+---
+
+## 🎬 Demo video & customer journey
+
+### Video
+
+**Demo video (primary submission asset):**  
+**https://youtu.be/amv4EivHgl4**
+
+[![FUSE demo video](https://img.youtube.com/vi/amv4EivHgl4/maxresdefault.jpg)](https://youtu.be/amv4EivHgl4)
+
+> Full walkthrough of the live product. Also open the app while watching: [fuse-sage.vercel.app](https://fuse-sage.vercel.app)
+
+### Customer journey (as shown in the video / live product)
+
+#### 1.1 Enters — what they click
+
+| Step | Actor | What they do / click |
+|------|--------|----------------------|
+| 1 | Visitor | Lands on **[fuse-sage.vercel.app](https://fuse-sage.vercel.app)** — hero, problem, how-it-works |
+| 2 | Visitor | Clicks **Pay with FUSE** / opens checkout (embedded section or modal) |
+| 3 | Payer | Clicks **Connect wallet** → approves Phantom / Solflare / Backpack |
+| 4 | Payer | Sees **real balances** → **selects one or more tokens** → adjusts allocation |
+| 5 | Payer | Reviews **live USDC quote** (route / impact) |
+| 6 | Payer | Pastes or confirms **merchant Solana address** (“Send USDC to”) |
+| 7 | Payer | Clicks **Pay** / confirm → **signs** in the wallet |
+| 8 | Merchant (optional) | Opens **[/dashboard](https://fuse-sage.vercel.app/dashboard)** — funnel + live event feed; can hit **Simulate payment** in demo mode |
+
+#### 1.2 Result — what they receive
+
+| Actor | Result of the service |
+|-------|------------------------|
+| **Payer** | Payment completed with tokens they already held; clear success state; **Solscan** link for the on-chain settlement |
+| **Merchant** | **USDC** (stable settlement) in their wallet — not a pile of random SPL tokens; optional analytics on opens → connect → quote → paid |
+| **Developer / merchant integrator** | A reusable **`<FuseCheckout />`** path and event stream they can ship on their own site |
+
+**One-line outcome:** *Buyer pays with any mix of Solana tokens → merchant receives USDC → both see a finished, understandable payment.*
 
 ---
 
